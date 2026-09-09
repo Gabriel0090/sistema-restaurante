@@ -33,14 +33,38 @@ router.post('/', async (req, res) => {
     }
 });
 
-// Listar pedidos
+// Listar pedidos completos com JOIN e agrupamento de itens
 router.get('/', async (req, res) => {
     try {
-        const resultado = await pool.query('SELECT * FROM pedidos');
+        const query = `
+            SELECT 
+                p.id AS pedido_id,
+                p.mesa,
+                p.status,
+                p.horario,
+                c.nome AS cliente,
+                f.nome AS garcom,
+                json_agg(
+                    json_build_object(
+                        'produto', pr.nome,
+                        'quantidade', ip.quantidade,
+                        'observacao', ip.observacao
+                    )
+                ) AS itens
+            FROM pedidos p
+            JOIN clientes c ON p.id_cliente = c.id
+            JOIN funcionarios f ON p.id_garcom = f.id
+            JOIN itens_pedido ip ON p.id = ip.id_pedido
+            JOIN produtos pr ON ip.id_produto = pr.id
+            GROUP BY p.id, c.nome, f.nome
+            ORDER BY p.horario DESC;
+        `;
+
+        const resultado = await pool.query(query);
         res.json(resultado.rows);
     } catch (erro) {
         console.error(erro);
-        res.status(500).json({ erro: 'Erro ao buscar pedidos' });
+        res.status(500).json({ erro: 'Erro ao buscar pedidos detalhados' });
     }
 });
 
