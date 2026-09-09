@@ -47,5 +47,6 @@ CREATE TABLE ficha_tecnica (
 );
 
 INSERT INTO funcionarios (nome, cargo) VALUES ('Carlos', 'Garçom');
-
 INSERT INTO produtos (nome, preco, ativo) VALUES ('Hambúrguer Clássico', 25.50, true);
+INSERT INTO clientes (nome, telefone) VALUES ('Gabriel', 51992934189);
+SELECT * FROM produtos;
